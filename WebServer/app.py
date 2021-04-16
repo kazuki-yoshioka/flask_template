@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect
 from datetime import timedelta
 from py.controller import controllerManager
-from py.model import baseModel
 import os
-
 
 cM = controllerManager.controllerManager()
 app = Flask(__name__)
@@ -22,24 +20,26 @@ def make_session_permanent():
 
     cM = controllerManager.controllerManager()
     disp = cM.beforeRequest(session, request)
-    if("login" == disp):
-        return redirect("http://localhost:5000/")
+    if ("login" == disp):
+        return redirect("/login")
 
 
-@app.route('/')
-def index():
+@app.route('/login')
+def login():
     """[summary]
 
     Returns: indexページを表示
         [type]: [description]
     """
-    cM.execute(session, request)
+    response = cM.execute(session, request)
+    session["nextUrl"] = response["nextUrl"]
+    session["errMassageList"] = response["errMassageList"]
+    session["response"] = response["response"]
 
-    dict = {"name": "name", "title": "title"}
-    return render_template("index.html", dict=dict)
+    return render_template(response["nextUrl"] + ".html", model=response["response"])
 
 
-@ app.route('/move', methods=['GET', 'POST'])
+@app.route('/move', methods=['GET', 'POST'])
 def move():
     data = request.json
     name = "Good"
@@ -48,21 +48,24 @@ def move():
     return render_template("/html/hellow.html", dict=dict)
 
 
-@ app.route('/fetch', methods=['GET', 'POST'])
+@app.route('/fetch', methods=['GET', 'POST'])
 def fetch():
     _session = cM.execute(session, request)
 
     return jsonify(_session["response"])
 
 
-@ app.route('/refresh', methods=['GET', 'POST'])
+@app.route('/refresh', methods=['GET', 'POST'])
 def fetchRefresh():
     data = request.json
     session['userId'] = data['id']
     session['password'] = data['password']
     session['nextUrl'] = '/move'
-    dict = {'name': data['id'], 'title': data['password'],
-            'nextUrl': data['nextUrl']}
+    dict = {
+        'name': data['id'],
+        'title': data['password'],
+        'nextUrl': data['nextUrl']
+    }
     return jsonify(dict)
 
 

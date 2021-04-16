@@ -2,6 +2,7 @@
 
 class baseModel(object):
     nextUrl = ""
+    displayTitle = ""
     sessionData = {}
     request = {}
     response = {}

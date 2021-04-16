@@ -1,6 +1,3 @@
-from ..model import baseModel
-
-
 class baseController:
     model = {}
 

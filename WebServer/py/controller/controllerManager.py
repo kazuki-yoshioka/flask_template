@@ -1,7 +1,5 @@
-from ..model import baseModel
 from ..model import modelManager
 from .login.loginController import *
-import inspect
 
 
 class controllerManager:
@@ -48,7 +46,7 @@ class controllerManager:
             return "login"
 
         # Index画面ではない
-        if request.path != '/':
+        if request.path != '/login':
             if '.js' in request.path or '.css' in request.path:
                 return ""
 
@@ -87,11 +85,15 @@ class controllerManager:
 
         con.after()
 
-        session["response"] = con.getModel().response
-        if con.getModel().nextUrl is None or con.getModel().nextUrl == "":
-            session["nextUrl"] = con.getModel().nextUrl
+        return self.setResponeData(con)
 
-        return
+    def setResponeData(self, con):
+        response = {}
+        response["model"] = con.model
+        response["response"] = vars(con.model)
+        response["nextUrl"] = con.model.nextUrl
+        response["errMassageList"] = con.model.errMassageList
+        return response
 
     def initExecute(self, session, request):
         """[summary] 初期処理
@@ -132,6 +134,7 @@ class controllerManager:
         for processing in self.processingList:
             pathStr = pathStr.replace(str(processing), "")
 
+        pathStr = pathStr.replace("/", "")
         return pathStr
 
     def createClass(self, baseInstanceName):
