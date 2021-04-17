@@ -12,9 +12,10 @@ var afterFetch = function loginAfter(data) {
  */
 function login() {
   param = {
-    id: $("#id")[0].value,
+    userId: $("#id")[0].value,
     password: $("#password")[0].value,
   };
 
-  commonFetchData(param, "fetch", null);
+  // ログイン処理
+  commonLogin(param);
 }

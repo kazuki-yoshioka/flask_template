@@ -1,10 +1,10 @@
-from ..baseModel import baseModel
+from ..BaseModel import BaseModel
 
 
-class loginModel(baseModel):
+class LoginModel(BaseModel):
     val = 100
     name = "ログイン"
-    id = ""
+    userId = ""
     password = ""
-    baseModel.displayTitle = "ログイン画面"
-    baseModel.nextUrl = "login"
+    BaseModel.displayTitle = "ログイン画面"
+    BaseModel.nextUrl = "login"

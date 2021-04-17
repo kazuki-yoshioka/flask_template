@@ -1,8 +1,8 @@
-from ...model.login.loginModel import loginModel
-from ..baseController import baseController
+from ...model.login.LoginModel import LoginModel
+from ..BaseController import BaseController
 
 
-class loginController(baseController):
+class LoginController(BaseController):
     val = 100
 
     def validate(self):

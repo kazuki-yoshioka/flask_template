@@ -1,12 +1,13 @@
 
 
-class baseModel(object):
+class BaseModel(object):
     nextUrl = ""
     displayTitle = ""
     sessionData = {}
     request = {}
     response = {}
     errMassageList = []
+    requestData = {}
 
     def __init__(self):
         self.sessionData = {}
@@ -20,6 +21,9 @@ class baseModel(object):
 
         if request is not None:
             self.request = request
+
+            if request.json is not None:
+                self.requestData = request.json
 
     def getExecuteModel(self, baseInstanceName):
         """[summary] 実行用のモデルを返却

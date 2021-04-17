@@ -1,8 +1,10 @@
-from ..model import modelManager
-from .login.loginController import *
+from ..utility.UtilityCheck import UtilityCheck
+from ..model import ModelManager
+from .login.LoginController import *
+from .login.EnterLoginController import *
 
 
-class controllerManager:
+class ControllerManager:
 
     """[summary]
         処理名称
@@ -45,13 +47,23 @@ class controllerManager:
             session['siteFlg'] = True
             return "login"
 
+        # ログイン中
+        if 'userId' in session and session['userId'] is not None:
+            return ""
+
+        # パラメータにログインIDを持っている
+        if request.json is not None and 'userId' in request.json:
+            return ""
+
         # Index画面ではない
-        if request.path != '/login':
+        if request.path != '/Login':
             if '.js' in request.path or '.css' in request.path:
                 return ""
 
             if 'userId' not in session or session['userId'] is None:
                 return "login"
+
+        return ""
 
     def execute(self, session, request):
         """[summary] 処理を実行する
@@ -130,9 +142,13 @@ class controllerManager:
         Returns:
             [type]: [description]
         """
-        pathStr = str(path)
-        for processing in self.processingList:
-            pathStr = pathStr.replace(str(processing), "")
+        splitPath = str(path).split("/")
+        if type(splitPath) is not list:
+            return str(path)
+
+        pathStr = ""
+        for _str in splitPath:
+            pathStr = pathStr + _str
 
         pathStr = pathStr.replace("/", "")
         return pathStr
@@ -152,13 +168,13 @@ class controllerManager:
             return None
 
         if baseInstanceName == "/":
-            baseInstanceName = "login"
+            baseInstanceName = "Login"
 
         jsonIns = {}
 
         try:
             # モデルクラスを生成
-            bModel = modelManager.modelManager()
+            bModel = ModelManager.ModelManager()
             modelIns = bModel.getExecuteModel(baseInstanceName)
 
             # コントローラクラスを生成
@@ -176,8 +192,44 @@ class controllerManager:
         return jsonIns
 
     def setModelFromParam(self, session, request, jsonIns):
+        """[summary] リクエストを受けたパラメータをモデルにセット
+
+        Args:
+            session ([type]): [description] セッション
+            request ([type]): [description] リクエストパラメータ
+            jsonIns ([type]): [description] インスタンス
+
+        Returns:
+            [type]: [description]
+        """
         modelIns = jsonIns["modelIns"]
         modelIns.setBaseModelFromParam(session, request)
+
+        # モデルのフィールド値にパラメータをセット
+        self.setModelProperty(modelIns, request.json)
         jsonIns["modelIns"] = modelIns
 
         return jsonIns
+
+    def setModelProperty(self, _model, _requestJson=None):
+        """[summary] モデルのプロパティ値にリクエストパラメータをセットする
+
+        Args:
+            _model ([type]): [description] モデル
+            _requestJson ([type]): [description] リクエストパラメータ
+        """
+        if _requestJson is None:
+            return
+
+        for key in _requestJson:
+            if UtilityCheck().isStr(key) is False:
+                continue
+
+            try:
+                setattr(_model, str(key), _requestJson[str(key)])
+
+            except Exception as e:
+                print(str(key) + ": は存在しない項目")
+                print(e)
+
+        return

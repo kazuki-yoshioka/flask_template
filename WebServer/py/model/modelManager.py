@@ -1,10 +1,11 @@
 import importlib.machinery as imm
 import importlib
-from .login.loginModel import *
+from .login.LoginModel import *
+from .login.EnterLoginModel import *
 import inspect
 
 
-class modelManager:
+class ModelManager:
 
     def __init__(self):
         print('exeute')

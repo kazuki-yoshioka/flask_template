@@ -1,29 +1,15 @@
-class BaseController:
-    model = {}
+from ...model.login.EnterLoginModel import EnterLoginModel
+from ..BaseController import BaseController
 
-    def __init__(self, _model):
-        self.model = _model
 
-    def setModel(self, _model):
-        """[summary] モデルをセットする
-
-        Args:
-            _model ([type]): [description]
-        """
-        self.model = _model
-
-    def getModel(self):
-        """[summary] モデルを返却
-
-        Returns:
-            [type]: [description]
-        """
-        return self.model
+class EnterLoginController(BaseController):
+    val = 100
 
     def validate(self):
         """[summary] バリデーションチェック
         """
         print(self.model)
+
         return True
 
     def execute(self):

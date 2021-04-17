@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, jsonify, session, redirect
 from datetime import timedelta
-from py.controller import controllerManager
+from py.controller.ControllerManager import ControllerManager
 import os
 
-cM = controllerManager.controllerManager()
+cM = ControllerManager()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -18,14 +18,14 @@ def make_session_permanent():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=1)
 
-    cM = controllerManager.controllerManager()
+    cM = ControllerManager()
     disp = cM.beforeRequest(session, request)
     if ("login" == disp):
-        return redirect("/login")
+        return redirect("/Login")
 
 
-@app.route('/login')
-def login():
+@app.route('/Login')
+def moveLogin():
     """[summary]
 
     Returns: indexページを表示
@@ -34,9 +34,24 @@ def login():
     response = cM.execute(session, request)
     session["nextUrl"] = response["nextUrl"]
     session["errMassageList"] = response["errMassageList"]
-    session["response"] = response["response"]
+    # session["response"] = response["response"]
 
     return render_template(response["nextUrl"] + ".html", model=response["response"])
+
+
+@app.route('/Enter/<name>/', methods=['GET', 'POST'])
+def enter(name=None):
+    """[summary]
+
+    Returns: indexページを表示
+        [type]: [description]
+    """
+    response = cM.execute(session, request)
+    session["nextUrl"] = response["nextUrl"]
+    session["errMassageList"] = response["errMassageList"]
+    # session["response"] = response["response"]
+
+    return jsonify({"nextUrl": "login"})
 
 
 @app.route('/move', methods=['GET', 'POST'])
