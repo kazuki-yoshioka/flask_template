@@ -43,3 +43,21 @@ class BaseController:
         """
         print("after")
         return True
+
+    def addErrorMessage(self, message):
+        """[summary] 画面に表示するメッセージを設定する
+
+        Args:
+            message ([type]): [description]
+            メッセージ
+        """
+        self.model.errMassageList.append(str(message))
+
+    def addNormalMessage(self, message):
+        """[summary] 画面に表示するメッセージを設定する
+
+        Args:
+            message ([type]): [description]
+            メッセージ
+        """
+        self.model.errMassageList.append(str(message))

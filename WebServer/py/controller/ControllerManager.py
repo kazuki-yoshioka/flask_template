@@ -1,3 +1,4 @@
+import inspect
 from ..utility.UtilityCheck import UtilityCheck
 from ..model import ModelManager
 from .login.LoginController import *
@@ -24,12 +25,12 @@ class ControllerManager:
         """[summary] 初期処理
         """
         self.processingList.append("init/")
-        self.processingList.append("move/")
-        self.processingList.append("search/")
-        self.processingList.append("fetch/")
-        self.processingList.append("regist/")
-        self.processingList.append("update/")
-        self.processingList.append("export/")
+        self.processingList.append("Move/")
+        self.processingList.append("Search/")
+        self.processingList.append("Fetch/")
+        self.processingList.append("Regist/")
+        self.processingList.append("Update/")
+        self.processingList.append("Export/")
 
     def beforeRequest(self, session={}, request={}):
         """[summary]
@@ -45,10 +46,10 @@ class ControllerManager:
         # セッション切れ
         if 'siteFlg' not in session:
             session['siteFlg'] = True
-            return "login"
+            return "Login"
 
         # ログイン中
-        if 'userId' in session and session['userId'] is not None:
+        if 'userId' in session and session['userId'] is not None and session['userId'] != "":
             return ""
 
         # パラメータにログインIDを持っている
@@ -61,7 +62,7 @@ class ControllerManager:
                 return ""
 
             if 'userId' not in session or session['userId'] is None:
-                return "login"
+                return "Login"
 
         return ""
 
@@ -85,7 +86,7 @@ class ControllerManager:
 
         if False is con.validate():
             # todo エラー処理
-            return
+            return self.setResponeData(con)
 
         try:
             con.execute()
@@ -100,11 +101,75 @@ class ControllerManager:
         return self.setResponeData(con)
 
     def setResponeData(self, con):
+        """[summary] 画面に返却するデータを設定
+
+        Args:
+            con ([type]): [description] コントローラ（モデルも含む）
+
+        Returns:
+            [type]: [description]
+        """
         response = {}
-        response["model"] = con.model
-        response["response"] = vars(con.model)
+        response["model"] = self.createResponseData(con.model)
+        response["message"] = self.createResponseMessage(con.model)
+
+        # ログイン情報を保持
+        loginInfo = self.createResponseLoginInfo(con.model)
+        response["userId"] = loginInfo["userId"]
+        response["loginInfo"] = loginInfo["loginInfo"]
+
         response["nextUrl"] = con.model.nextUrl
-        response["errMassageList"] = con.model.errMassageList
+
+        return response
+
+    def createResponseLoginInfo(self, model):
+        """[summary] セッション用のログイン情報を作成
+
+        Args:
+            model ([type]): [description]
+        """
+        loginInfo = {}
+        loginInfo["userId"] = ""
+        loginInfo["loginInfo"] = {}
+
+        # ログイン情報が空
+        if model.loginModel is None or len(model.loginModel) == 0:
+            return loginInfo
+
+        loginInfo["userId"] = model.loginModel["userId"]
+        loginInfo["loginInfo"] = model.loginModel
+
+        return loginInfo
+
+    def createResponseMessage(self, model):
+        """[summary] 画面に表示するメッセージを作成
+
+        Args:
+            model ([type]): [description]
+        """
+        message = {}
+        message["errMessage"] = model.errMassageList
+        message["normalMessage"] = model.normalMassageList
+        return message
+
+    def createResponseData(self, model):
+        """[summary] モデルの変数をdictionary形式に変更
+
+        Args:
+            model ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
+        response = {}
+        for key in inspect.getmembers(model):
+            if (len(key) < 1):
+                continue
+
+            if (isinstance(key[1], (int, str))):
+                print(key)
+                response[str(key[0])] = key[1]
+
         return response
 
     def initExecute(self, session, request):

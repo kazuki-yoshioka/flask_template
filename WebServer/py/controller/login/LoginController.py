@@ -18,6 +18,7 @@ class LoginController(BaseController):
             [type]: [description]
         """
         print("execute")
+        self.model.nextUrl = "Login"
         return True
 
     def after(self):

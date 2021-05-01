@@ -41,81 +41,7 @@ function sendJsonData() {
  * url: 画面遷移するurl
  */
 function sendRequestMoveDisplay(_url) {
-  window.location.href = location.origin + _url;
-}
-
-/**
- * JSONデータを取得する
- * 画面を最新化する
- */
-function commonFetchDataRefresh(_param, _url, _successDoneFunc) {
-  var url = "";
-  if (_param == null || JSON.stringify(_param) === "{}") {
-    _param = { none: "none" };
-  }
-  _param["nextUrl"] = location.origin + "/move";
-  if (null == _url) {
-    url = location.href;
-  } else {
-    url = location.origin + "/" + _url;
-  }
-
-  fetch(url, {
-    method: "POST", // or 'PUT'
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(_param),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Success:", data);
-
-      // データ取得、後処理を実行
-      commonMoveDisplay();
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-}
-/**
- * JSONデータを取得する
- */
-function commonFetchData(_param, _url, _successDoneFunc) {
-  var url = "";
-  if (_param == null || JSON.stringify(_param) === "{}") {
-    _param = { none: "none" };
-  }
-  if (null == _url) {
-    url = location.href;
-  } else {
-    url = location.origin + "/" + _url;
-  }
-
-  fetch(url, {
-    method: "POST", // or 'PUT'
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(_param),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Success:", data);
-
-      // データ取得、後処理を実行
-      if (_successDoneFunc && typeof _successDoneFunc === "function") {
-        _successDoneFunc(JSON.stringify(data));
-      }
-
-      // 次画面URLがセットされている場合、次画面へ遷移
-      if (!commonCheckStrIsEmpty(data["nextUrl"])) {
-        commonMoveDisplay(data["nextUrl"]);
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+  window.location.href = location.origin + "/Move/" + _url;
 }
 
 /**
@@ -130,7 +56,7 @@ function sendRequestServer(_param, _url, _successDoneFunc) {
     return;
   }
 
-  if (!commonCheckStrIsEmpty(_url)) {
+  if (commonCheckStrIsEmpty(_url)) {
     alert("サーバに送信用のUrlが空です。");
     return;
   }
@@ -143,24 +69,32 @@ function sendRequestServer(_param, _url, _successDoneFunc) {
     },
     body: JSON.stringify(_param),
   })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Success:", data);
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error();
+      }
+      return response.json();
+    })
+    .then((json) => {
+      console.log("Success:", json);
+
+      displayMessage(json["message"]);
 
       // 次画面URLがセットされている場合、次画面へ遷移
-      if (!commonCheckStrIsEmpty(data["nextUrl"])) {
-        sendRequestMoveDisplay(data["nextUrl"]);
+      if (!commonCheckStrIsEmpty(json["nextUrl"])) {
+        sendRequestMoveDisplay(json["nextUrl"]);
       }
 
       // データ取得、後処理を実行
       if (
-        commonCheckIsNull(_successDoneFunc) &&
+        !commonCheckIsNull(_successDoneFunc) &&
         typeof _successDoneFunc === "function"
       ) {
-        _successDoneFunc(JSON.stringify(data));
+        _successDoneFunc(JSON.stringify(json));
       }
     })
     .catch((error) => {
       console.error("Error:", error);
+      alert(error);
     });
 }

@@ -7,4 +7,4 @@ class LoginModel(BaseModel):
     userId = ""
     password = ""
     BaseModel.displayTitle = "ログイン画面"
-    BaseModel.nextUrl = "login"
+    BaseModel.nextUrl = ""

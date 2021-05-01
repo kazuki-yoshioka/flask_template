@@ -7,13 +7,16 @@ class BaseModel(object):
     request = {}
     response = {}
     errMassageList = []
+    normalMassageList = []
     requestData = {}
+    loginModel = {}
 
     def __init__(self):
         self.sessionData = {}
         self.request = {}
         self.response = {}
         self.errMassageList = []
+        self.normalMassageList = []
 
     def setBaseModelFromParam(self, session, request):
         if 'response' in session:
@@ -37,3 +40,11 @@ class BaseModel(object):
         cls = globals()[baseInstanceName + "Model"]
         modelIns = cls()
         return modelIns
+
+    def setLoginModel(self, _model):
+        """[summary] ログイン情報を保持する
+
+        Args:
+            _model ([type]): [description]
+        """
+        self.loginModel = _model

@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, jsonify, session, redirect
+from flask import Flask, render_template, request, jsonify, session, redirect, make_response
 from datetime import timedelta
 from py.controller.ControllerManager import ControllerManager
 import os
+from flask_cors import CORS
 
 cM = ControllerManager()
 app = Flask(__name__)
+CORS(app)
 app.secret_key = os.urandom(24)
 
 
@@ -16,11 +18,11 @@ def make_session_permanent():
         [type]: [description]
     """
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=1)
+    app.permanent_session_lifetime = timedelta(minutes=30)
 
     cM = ControllerManager()
     disp = cM.beforeRequest(session, request)
-    if ("login" == disp):
+    if ("Login" == disp):
         return redirect("/Login")
 
 
@@ -32,42 +34,48 @@ def moveLogin():
         [type]: [description]
     """
     response = cM.execute(session, request)
-    session["nextUrl"] = response["nextUrl"]
-    session["errMassageList"] = response["errMassageList"]
+    session["response"] = response["nextUrl"]
+    #session["errMassageList"] = response["errMassageList"]
     # session["response"] = response["response"]
 
-    return render_template(response["nextUrl"] + ".html", model=response["response"])
+    return render_template(response["nextUrl"] + ".html", model=response)
 
 
-@app.route('/Enter/<name>/', methods=['GET', 'POST'])
-def enter(name=None):
+@app.route('/Enter/<path1>/', methods=['GET', 'POST'])
+@app.route('/Enter/<path1>/<path2>/', methods=['GET', 'POST'])
+def enter(path1=None, path2=None):
     """[summary]
 
     Returns: indexページを表示
         [type]: [description]
     """
     response = cM.execute(session, request)
-    session["nextUrl"] = response["nextUrl"]
-    session["errMassageList"] = response["errMassageList"]
-    # session["response"] = response["response"]
+    session["response"] = response
+    session["model"] = response["model"]
+    session["userId"] = response["userId"]
+    # session["model"] = response["model"]
 
-    return jsonify({"nextUrl": "login"})
+    dict = response
+    return jsonify(dict)
 
 
-@app.route('/move', methods=['GET', 'POST'])
-def move():
-    data = request.json
-    name = "Good"
-    title = "階層チェンジ"
-    dict = {name: name, data: data, title: title}
-    return render_template("/html/hellow.html", dict=dict)
+@app.route('/Move/<path1>/', methods=['GET', 'POST'])
+@app.route('/Move/<path1>/<path2>/', methods=['GET', 'POST'])
+def move(path1=None, path2=None):
+    #nextUrl = "/" + path + ".html"
+    nextUrl = "/Menu/Menu.html"
+    return render_template(nextUrl, model=session["model"])
 
 
 @app.route('/fetch', methods=['GET', 'POST'])
 def fetch():
-    _session = cM.execute(session, request)
-
-    return jsonify(_session["response"])
+    #_session = cM.execute(session, request)
+    dict = {
+        'name': 'name',
+        'title': 'title',
+        'nextUrl': 'nextUrl'
+    }
+    return jsonify(dict)
 
 
 @app.route('/refresh', methods=['GET', 'POST'])
